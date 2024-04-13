@@ -1,0 +1,20 @@
+{
+	"name": "ds_config_ecdc_json",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_populationdata_ablst",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "ecdc_file_list.json",
+				"container": "configs"
+			}
+		},
+		"schema": {}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

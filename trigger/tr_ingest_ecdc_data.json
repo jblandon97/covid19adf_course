@@ -1,0 +1,28 @@
+{
+	"name": "tr_ingest_ecdc_data",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pl_ingest_ecdc_data",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"relativeUrl": "cloudboxacademy/covid19/raw/main/ecdc_data/testing.csv",
+					"sinkFileName": "testing.csv"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2024-03-28T14:44:00",
+				"timeZone": "SA Pacific Standard Time"
+			}
+		}
+	}
+}

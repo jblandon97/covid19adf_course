@@ -1,0 +1,21 @@
+{
+	"name": "ds_silver_hospital_admissions_daily_parquet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_populationdata_adlg2",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "ecdc/hospital_admissions/daily",
+				"fileSystem": "silver"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

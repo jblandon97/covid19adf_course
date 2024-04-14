@@ -38,6 +38,10 @@
 		"tr_ingest_population_data_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/61a49223-2cbd-4a43-a039-78a47c46dd36/resourceGroups/datafactorycourse-rg/providers/Microsoft.Storage/storageAccounts/populationdatabs"
+		},
+		"ls_db_adfcourse_cluster_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0414-214718-tjqmvg0x"
 		}
 	},
 	"variables": {
@@ -1565,7 +1569,7 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"notebookPath": "/Formula1/covid19-proyect/transform_population_data"
+							"notebookPath": "/covid19-proyect/transform_population_data"
 						},
 						"linkedServiceName": {
 							"referenceName": "ls_db_adfcourse_cluster",
@@ -1595,14 +1599,7 @@
 						"type": "SecureString",
 						"value": "[parameters('ls_db_adfcourse_cluster_accessToken')]"
 					},
-					"newClusterNodeType": "Standard_DS3_v2",
-					"newClusterNumOfWorker": "1",
-					"newClusterSparkEnvVars": {
-						"PYSPARK_PYTHON": "/databricks/python3/bin/python3"
-					},
-					"newClusterVersion": "14.2.x-scala2.12",
-					"clusterOption": "Fixed",
-					"newClusterInitScripts": []
+					"existingClusterId": "[parameters('ls_db_adfcourse_cluster_properties_typeProperties_existingClusterId')]"
 				}
 			},
 			"dependsOn": []

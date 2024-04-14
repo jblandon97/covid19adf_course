@@ -39,6 +39,10 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/61a49223-2cbd-4a43-a039-78a47c46dd36/resourceGroups/datafactorycourse-rg/providers/Microsoft.Storage/storageAccounts/populationdatabs"
 		},
+		"ls_db_adfcourse_cluster_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0414-214718-tjqmvg0x"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -80,6 +84,9 @@
 					},
 					"ls_populationdata_adlg2_properties_typeProperties_url": {
 						"value": "[parameters('ls_populationdata_adlg2_properties_typeProperties_url')]"
+					},
+					"ls_db_adfcourse_cluster_properties_typeProperties_existingClusterId": {
+						"value": "[parameters('ls_db_adfcourse_cluster_properties_typeProperties_existingClusterId')]"
 					}
 				}
 			},

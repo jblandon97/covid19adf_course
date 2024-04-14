@@ -26,6 +26,10 @@
 		"ls_populationdata_adlg2_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://populationdatadlg2.dfs.core.windows.net/"
+		},
+		"ls_db_adfcourse_cluster_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0414-214718-tjqmvg0x"
 		}
 	},
 	"variables": {
@@ -96,14 +100,7 @@
 						"type": "SecureString",
 						"value": "[parameters('ls_db_adfcourse_cluster_accessToken')]"
 					},
-					"newClusterNodeType": "Standard_DS3_v2",
-					"newClusterNumOfWorker": "1",
-					"newClusterSparkEnvVars": {
-						"PYSPARK_PYTHON": "/databricks/python3/bin/python3"
-					},
-					"newClusterVersion": "14.2.x-scala2.12",
-					"clusterOption": "Fixed",
-					"newClusterInitScripts": []
+					"existingClusterId": "[parameters('ls_db_adfcourse_cluster_properties_typeProperties_existingClusterId')]"
 				}
 			},
 			"dependsOn": []
@@ -671,7 +668,7 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"notebookPath": "/Formula1/covid19-proyect/transform_population_data"
+							"notebookPath": "/covid19-proyect/transform_population_data"
 						},
 						"linkedServiceName": {
 							"referenceName": "ls_db_adfcourse_cluster",

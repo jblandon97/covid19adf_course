@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Formula1/covid19-proyect/transform_population_data"
+					"notebookPath": "/covid19-proyect/transform_population_data"
 				},
 				"linkedServiceName": {
 					"referenceName": "ls_db_adfcourse_cluster",

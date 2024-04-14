@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "datafactorycourse-in"
+		},
+		"ls_populationdata_ablst_connectionString": {
+			"value": ""
+		},
+		"ls_populationdata_adlg2_accountKey": {
+			"value": ""
+		},
+		"ls_db_adfcourse_cluster_accessToken": {
+			"value": ""
+		},
+		"ls_http_open_data_ecdc_eu_properties_typeProperties_url": {
+			"value": "@{linkedService().baseURL}"
+		},
+		"ls_populationdata_adlg2_properties_typeProperties_url": {
+			"value": "https://populationdatadlg2.dfs.core.windows.net/"
+		},
+		"tr_ingest_ecdc_data_properties_pl_ingest_ecdc_data_parameters_relativeUrl": {
+			"value": "cloudboxacademy/covid19/raw/main/ecdc_data/testing.csv"
+		},
+		"tr_ingest_ecdc_data_properties_pl_ingest_ecdc_data_parameters_sinkFileName": {
+			"value": "testing.csv"
+		},
+		"tr_ingest_population_data_properties_typeProperties_scope": {
+			"value": "/subscriptions/61a49223-2cbd-4a43-a039-78a47c46dd36/resourceGroups/datafactorycourse-rg/providers/Microsoft.Storage/storageAccounts/populationdatabs"
+		}
+	}
+}

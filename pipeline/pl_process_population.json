@@ -1,0 +1,28 @@
+{
+	"name": "pl_process_population",
+	"properties": {
+		"activities": [
+			{
+				"name": "Notebook transform_population_data",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Formula1/covid19-proyect/transform_population_data"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_db_adfcourse_cluster",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"annotations": []
+	}
+}

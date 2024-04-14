@@ -25,6 +25,319 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/pl_ingest_population_data')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Check if file exists",
+						"type": "Validation",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_population_raw_gz",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"timeout": "0.00:00:13",
+							"sleep": 3,
+							"minimumSize": 1024
+						}
+					},
+					{
+						"name": "Get File Metadata",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "Check if file exists",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_population_raw_gz",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"columnCount",
+								"size"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "If Condition column matches",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Get File Metadata",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('Get File Metadata').output.columnCount,13)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Copy population data",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_population_raw_gz",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_population_raw_tsv",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								},
+								{
+									"name": "Delete Source",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "Copy population data",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ds_population_raw_gz",
+											"type": "DatasetReference",
+											"parameters": {}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": false,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-04-13T04:47:30Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_transform_cases_deaths')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_raw_cases_and_deaths",
+								"type": "DatasetReference"
+							},
+							"name": "CasesAndDeathsSource"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_country_loockup",
+								"type": "DatasetReference"
+							},
+							"name": "countryCode"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_silver_cases_and_deaths_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "CasesAndDeathsSink",
+							"rejectedDataLinkedService": {
+								"referenceName": "ls_populationdata_adlg2",
+								"type": "LinkedServiceReference"
+							}
+						}
+					],
+					"transformations": [
+						{
+							"name": "filterEuropeOnly"
+						},
+						{
+							"name": "selectRequeriedFields"
+						},
+						{
+							"name": "pivotIndicators"
+						},
+						{
+							"name": "lookupCountryCode"
+						},
+						{
+							"name": "selectRequeriedFields2"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          country as string,",
+						"          country_code as string,",
+						"          continent as string,",
+						"          population as integer,",
+						"          indicator as string,",
+						"          daily_count as integer,",
+						"          date as date,",
+						"          rate_14_day as double,",
+						"          source as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> CasesAndDeathsSource",
+						"source(output(",
+						"          country as string,",
+						"          country_code_2_digit as string,",
+						"          country_code_3_digit as string,",
+						"          continent as string,",
+						"          population as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> countryCode",
+						"CasesAndDeathsSource filter(continent == 'Europe' && not(isNull(country_code))) ~> filterEuropeOnly",
+						"filterEuropeOnly select(mapColumn(",
+						"          country,",
+						"          country_code,",
+						"          population,",
+						"          indicator,",
+						"          daily_count,",
+						"          report_date = date,",
+						"          source",
+						"     ),",
+						"     skipDuplicateMapInputs: false,",
+						"     skipDuplicateMapOutputs: false) ~> selectRequeriedFields",
+						"selectRequeriedFields pivot(groupBy(country,",
+						"          country_code,",
+						"          population,",
+						"          report_date,",
+						"          source),",
+						"     pivotBy(indicator, ['confirmed cases', 'deaths']),",
+						"     {_total} = sum(daily_count),",
+						"     columnNaming: '$V$N',",
+						"     lateral: true) ~> pivotIndicators",
+						"pivotIndicators, countryCode lookup(pivotIndicators@country == countryCode@country,",
+						"     multiple: false,",
+						"     pickup: 'any',",
+						"     broadcast: 'auto')~> lookupCountryCode",
+						"lookupCountryCode select(mapColumn(",
+						"          country = pivotIndicators@country,",
+						"          country_code_2_digit,",
+						"          country_code_3_digit,",
+						"          population = pivotIndicators@population,",
+						"          confirmed_cases_total = {confirmed cases_total},",
+						"          deaths_total,",
+						"          report_date,",
+						"          source",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectRequeriedFields2",
+						"selectRequeriedFields2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> CasesAndDeathsSink"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/df_transform_hospital_admissions')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -286,6 +599,175 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pl_load_cases_and_deaths')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy cases and deaths",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.parquet",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "TRUNCATE TABLE [covid_reporting].[cases_and_deaths];",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "country",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "country",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "country_code_2_digit",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "country_code_2_digit",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "country_code_3_digit",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "country_code_3_digit",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "population",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "population",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "confirmed_cases_total",
+											"type": "Int64",
+											"physicalType": "INT64"
+										},
+										"sink": {
+											"name": "cases_count",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "deaths_total",
+											"type": "Int64",
+											"physicalType": "INT64"
+										},
+										"sink": {
+											"name": "deaths_count",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "report_date",
+											"type": "DateTime",
+											"physicalType": "DATE"
+										},
+										"sink": {
+											"name": "reported_date",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "source",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "source",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ds_silver_cases_and_deaths_parquet",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ds_db_cases_and_deaths",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pl_process_cases_and_deaths')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -329,7 +811,9 @@
 				"annotations": [],
 				"lastPublishTime": "2024-04-04T17:36:49Z"
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_transform_cases_deaths')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pl_process_hospital_admissions')]",
@@ -438,7 +922,9 @@
 					]
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pl_ingest_population_data')]"
+			]
 		}
 	]
 }
